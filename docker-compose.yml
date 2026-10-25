@@ -1,0 +1,61 @@
+# Local development stack: MongoDB (single-node replica set, so transactions work), Redis,
+# API and a separate background worker. Not a production deployment.
+#
+#   cp .env.example .env    # then edit secrets
+#   docker compose up --build
+#   docker compose exec api npm run seed -- --with-stock
+#   docker compose exec api npm run create-admin -- --email you@store.in --password 'Long-Admin-Pass-1'
+services:
+  mongo:
+    image: mongo:8.0
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports: ["127.0.0.1:27017:27017"]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok }"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports: ["127.0.0.1:6379:6379"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/crockery?replicaSet=rs0
+      REDIS_URL: redis://redis:6379
+      RUN_WORKERS: "false"
+      RUN_SCHEDULERS: "false"
+    ports: ["4000:4000"]
+    volumes: [uploads:/app/uploads]
+    depends_on:
+      mongo: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  worker:
+    build: .
+    command: ["node", "src/worker.js"]
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/crockery?replicaSet=rs0
+      REDIS_URL: redis://redis:6379
+    volumes: [uploads:/app/uploads]
+    depends_on:
+      mongo: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+volumes:
+  mongo-data:
+  redis-data:
+  uploads:
