@@ -26,15 +26,23 @@ const redact = {
   censor: '[REDACTED]',
 };
 
+/** pino-pretty is a dev dependency: use it only where it is installed (never on Vercel/serverless). */
+function prettyAvailable() {
+  if (env.NODE_ENV !== 'development' || process.env.VERCEL) return false;
+  try {
+    require.resolve('pino-pretty');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const logger = pino({
   level: env.isTest ? 'silent' : env.LOG_LEVEL,
   redact,
   base: { service: 'crockery-api' },
   timestamp: pino.stdTimeFunctions.isoTime,
-  transport:
-    env.NODE_ENV === 'development'
-      ? { target: 'pino-pretty', options: { colorize: true, translateTime: 'SYS:HH:MM:ss' } }
-      : undefined,
+  transport: prettyAvailable() ? { target: 'pino-pretty', options: { colorize: true, translateTime: 'SYS:HH:MM:ss' } } : undefined,
 });
 
 module.exports = logger;
