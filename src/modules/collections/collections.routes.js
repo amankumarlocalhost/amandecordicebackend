@@ -17,7 +17,7 @@ const { PERMISSIONS } = require('../../constants/roles');
 const body = z.object({
   name: z.string().trim().min(2).max(100),
   slug: z.string().trim().toLowerCase().regex(/^[a-z0-9-]+$/).max(100).optional(),
-  type: z.enum(['curated', 'gift', 'festival', 'brand', 'seasonal']).default('curated'),
+  type: z.enum(['curated', 'gift', 'festival', 'brand', 'seasonal', 'space']).default('curated'),
   description: z.string().max(2000).optional(),
   image: z.object({ media: objectId().optional(), url: z.string().url().optional(), alt: z.string().max(160).optional() }).refine((i) => i.media || i.url, 'image needs media or url').nullable().optional(),
   isActive: z.boolean().optional(),
@@ -47,7 +47,7 @@ async function withImage(data, existing) {
 
 const pub = createRouter({ prefix: '/api/v1/collections', tag: 'Catalog' });
 
-pub.get('/', { summary: 'Live collections (gift sets, festive edits, brand lines)', query: z.object({ type: z.enum(['curated', 'gift', 'festival', 'brand', 'seasonal']).optional() }) }, async (req, res) => {
+pub.get('/', { summary: 'Live collections (gift sets, festive edits, brand lines)', query: z.object({ type: z.enum(['curated', 'gift', 'festival', 'brand', 'seasonal', 'space']).optional() }) }, async (req, res) => {
   const items = await cache.wrap(cache.NS.CATALOG, `collections:${req.query.type || 'all'}`, 300, () =>
     Collection.find({ ...liveFilter(), ...(req.query.type ? { type: req.query.type } : {}) }).sort({ sortOrder: 1 }).select('-__v').lean(),
   );

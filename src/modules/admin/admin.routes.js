@@ -72,6 +72,30 @@ overview.get('/', { summary: 'Counts for the admin dashboard, limited to what yo
       }),
       Product.countDocuments({ $or: [{ 'images.pending': true }, { 'images.replacement.ready': true }] }).then((n) => (tasks.productsWithPendingMedia = n)),
     );
+    // Catalog overview tiles (totals across all statuses; archived products excluded).
+    const Category = require('../categories/category.model');
+    jobs.push(
+      Promise.all([
+        Product.countDocuments({ status: { $ne: 'archived' } }),
+        Product.countDocuments({ status: 'active' }),
+        Product.countDocuments({ status: { $ne: 'archived' }, inStock: false }),
+        Category.countDocuments({ level: 0 }),
+        Category.countDocuments({ level: { $gt: 0 } }),
+      ]).then(([total, active, outOfStock, categories, subcategories]) => {
+        tasks.catalog = { totalProducts: total, activeProducts: active, outOfStockProducts: outOfStock, categories, subcategories };
+      }),
+    );
+  }
+  if (has(P.REPORTS_SALES)) {
+    // Trailing 12 months (the sales report's maximum range), using the same revenue rules: collected money only.
+    const analytics = require('../analytics/analytics.service');
+    const to = new Date();
+    jobs.push(
+      analytics
+        .salesSummary({ from: new Date(to.getTime() - 365 * 86400000), to, granularity: 'month' })
+        .then((s) => (tasks.sales = { periodDays: 365, totalOrders: s.totals?.orders || 0, totalRevenue: s.totals?.collected?.total || 0 }))
+        .catch(() => {}),
+    );
   }
   if (has(P.MEDIA_REVIEW) || has(P.CATALOG_READ)) {
     const { Upload } = require('../media/media.model');

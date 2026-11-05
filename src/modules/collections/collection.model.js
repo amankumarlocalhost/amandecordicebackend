@@ -8,7 +8,7 @@ const collectionSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     slug: { type: String, required: true, lowercase: true, trim: true },
-    type: { type: String, enum: ['curated', 'gift', 'festival', 'brand', 'seasonal'], default: 'curated' },
+    type: { type: String, enum: ['curated', 'gift', 'festival', 'brand', 'seasonal', 'space'], default: 'curated' },
     description: { type: String, maxlength: 2000 },
     image: { media: { type: mongoose.Schema.Types.ObjectId, ref: 'Upload' }, url: String, key: String, mediumUrl: String, thumbUrl: String, alt: { type: String, maxlength: 160 } },
     isActive: { type: Boolean, default: true },

@@ -23,7 +23,7 @@ const imageRef = z
   .object({ media: objectId().optional(), url: z.string().url().optional(), alt: text(160).optional() })
   .refine((i) => i.media || i.url, 'Choose an image from the media library');
 
-const SECTION_IDS = ['hero', 'features', 'categories', 'promo', 'bestSellers', 'inspiration', 'newArrivals', 'collections', 'whyChoose', 'testimonials', 'gallery', 'newsletter'];
+const SECTION_IDS = ['hero', 'features', 'categories', 'promo', 'bestSellers', 'inspiration', 'newArrivals', 'collections', 'whyChoose', 'testimonials', 'gallery', 'newsletter', 'shopByCategory', 'spaces', 'trending'];
 const ICONS = ['leaf', 'diamond', 'box', 'users', 'truck', 'shield', 'hand', 'heart', 'star', 'gift', 'sparkle'];
 
 const homepage = z.object({

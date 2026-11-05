@@ -22,6 +22,7 @@ const body = z.object({
   image: z.object({ media: objectId().optional(), url: z.string().url().optional(), alt: z.string().max(160).optional() }).refine((i) => i.media || i.url, 'image needs media or url').nullable().optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
   seo: z.object({ title: z.string().max(70), description: z.string().max(170), keywords: z.array(z.string().max(40)).max(15) }).partial().optional(),
 });
 
@@ -59,7 +60,7 @@ const pub = createRouter({ prefix: '/api/v1/categories', tag: 'Catalog' });
 
 pub.get('/', { summary: 'Category tree (active categories)' }, async (req, res) => {
   const tree = await cache.wrap(cache.NS.CATEGORIES, 'tree', 600, async () => {
-    const cats = await Category.find({ isActive: true }).select('name slug parent level image sortOrder description').lean();
+    const cats = await Category.find({ isActive: true }).select('name slug parent level image sortOrder description isFeatured').lean();
     return buildTree(cats);
   });
   ok(res, tree);
@@ -71,7 +72,7 @@ pub.get('/:slug', { summary: 'Category by slug or id, with breadcrumb', params: 
   if (!cat) throw notFound('Category');
   const [breadcrumb, children] = await Promise.all([
     Category.find({ _id: { $in: cat.ancestors } }).select('name slug level').sort({ level: 1 }).lean(),
-    Category.find({ parent: cat._id, isActive: true }).select('name slug image sortOrder').sort({ sortOrder: 1 }).lean(),
+    Category.find({ parent: cat._id, isActive: true }).select('name slug image sortOrder description').sort({ sortOrder: 1 }).lean(),
   ]);
   ok(res, { ...cat, breadcrumb, children });
 });

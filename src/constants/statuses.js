@@ -144,6 +144,16 @@ const MATERIALS = [
   'silicone',
   'resin',
   'fabric',
+  // Home décor materials (added for the décor catalog; existing values unchanged)
+  'metal',
+  'iron',
+  'aluminium',
+  'marble',
+  'terracotta',
+  'jute',
+  'rattan',
+  'mdf',
+  'concrete',
   'other',
 ];
 

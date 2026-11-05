@@ -18,6 +18,8 @@ const categorySchema = new mongoose.Schema(
     image: { media: { type: mongoose.Schema.Types.ObjectId, ref: 'Upload' }, url: String, key: String, mediumUrl: String, thumbUrl: String, alt: { type: String, maxlength: 160 } },
     sortOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    // Highlighted in storefront showcases (e.g. the homepage category grid). Optional; defaults off.
+    isFeatured: { type: Boolean, default: false },
     seo: seoSchema,
   },
   { timestamps: true },
