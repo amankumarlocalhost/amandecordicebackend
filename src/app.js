@@ -57,6 +57,8 @@ function createApp() {
   app.use(sanitizeInput);
 
   app.use('/health', health.router);
+  // Root status page ("API is running"), e.g. the Vercel deployment URL.
+  app.get('/', require('./routes/status').handler);
   if (env.STORAGE_DRIVER === 'local') app.use('/uploads', express.static(storage.LOCAL_ROOT, { maxAge: '30d', immutable: true, fallthrough: false, dotfiles: 'deny' }));
 
   app.use('/api', limits.api);
