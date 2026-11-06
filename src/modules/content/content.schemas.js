@@ -34,31 +34,41 @@ const homepage = z.object({
     .optional(),
   hero: z
     .object({
+      eyebrow: text(60),
       heading: text(120),
       subheading: text(300),
       image: imageRef,
       imagePosition: z.string().regex(/^\d{1,3}% \d{1,3}%$|^center$/, 'Use e.g. "62% 50%"'),
       primaryCta: link,
       secondaryCta: link,
+      /** Slowly scrolling brand lines under the hero. */
+      brandLines: z.array(text(80).min(1)).max(8),
+      /** Small "featured" card in the hero corner (desktop). */
+      featured: z.object({ enabled: z.boolean(), eyebrow: text(30), title: text(60), href, linkLabel: text(30), image: imageRef }).partial(),
     })
     .partial()
     .optional(),
+  /** Store promises strip; custom items replace the built-in ones (shipping/COD/returns facts still come from settings when no items are set). */
+  features: z.object({ items: z.array(z.object({ icon: z.enum(ICONS).default('diamond'), title: text(40).min(1), text: text(80) })).max(6) }).partial().optional(),
+  shopByCategory: z.object({ eyebrow: text(40), title: text(60), body: text(300), limit: z.number().int().min(2).max(12) }).partial().optional(),
+  spaces: z.object({ eyebrow: text(40), title: text(60), caption: text(40), linkLabel: text(30), allLabel: text(30) }).partial().optional(),
+  trending: z.object({ eyebrow: text(40), title: text(60), limit: z.number().int().min(4).max(20) }).partial().optional(),
   categoryCards: z
     .object({ items: z.array(z.object({ title: text(40).min(1), subtitle: text(80).optional(), href, image: imageRef, badge: text(12).optional() })).max(8) })
     .partial()
     .optional(),
   promo: z.object({ script: text(30), title: text(60), body: text(400), note: text(80), cta: link, image: imageRef }).partial().optional(),
-  bestSellers: z.object({ title: text(60), limit: z.number().int().min(4).max(20) }).partial().optional(),
+  bestSellers: z.object({ eyebrow: text(40), title: text(60), limit: z.number().int().min(4).max(20) }).partial().optional(),
   newArrivals: z.object({ eyebrow: text(40), title: text(60), limit: z.number().int().min(4).max(20) }).partial().optional(),
-  inspiration: z.object({ heading: text(80), body: text(400), cta: link, image: imageRef, thumbs: z.array(imageRef).max(4) }).partial().optional(),
+  inspiration: z.object({ eyebrow: text(40), heading: text(80), body: text(400), cta: link, image: imageRef, thumbs: z.array(imageRef).max(4) }).partial().optional(),
   collections: z.object({ eyebrow: text(40), title: text(60), limit: z.number().int().min(1).max(6) }).partial().optional(),
   whyChoose: z
-    .object({ heading: text(80), items: z.array(z.object({ icon: z.enum(ICONS).default('leaf'), title: text(60).min(1), text: text(200) })).max(6), image: imageRef })
+    .object({ eyebrow: text(40), heading: text(80), items: z.array(z.object({ icon: z.enum(ICONS).default('leaf'), title: text(60).min(1), text: text(200) })).max(6), image: imageRef })
     .partial()
     .optional(),
-  testimonials: z.object({ title: text(60) }).partial().optional(),
-  gallery: z.object({ heading: text(80), images: z.array(imageRef).max(12) }).partial().optional(),
-  newsletter: z.object({ heading: text(60), body: text(200) }).partial().optional(),
+  testimonials: z.object({ eyebrow: text(40), title: text(60) }).partial().optional(),
+  gallery: z.object({ eyebrow: text(40), heading: text(80), images: z.array(imageRef).max(12) }).partial().optional(),
+  newsletter: z.object({ heading: text(60), body: text(200), image: imageRef }).partial().optional(),
   seo: z.object({ title: text(70), description: text(170) }).partial().optional(),
 });
 

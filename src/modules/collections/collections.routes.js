@@ -78,7 +78,8 @@ admin.post('/', { summary: 'Create collection', permission: PERMISSIONS.CATALOG_
   created(res, col);
 });
 
-admin.patch('/:id', { summary: 'Update collection', permission: PERMISSIONS.CATALOG_WRITE, params: z.object({ id: objectId() }), body: body.partial() }, async (req, res) => {
+// Partial updates must not inherit `type`'s default (it would silently turn e.g. a space into a curated collection).
+admin.patch('/:id', { summary: 'Update collection', permission: PERMISSIONS.CATALOG_WRITE, params: z.object({ id: objectId() }), body: body.partial().extend({ type: z.enum(['curated', 'gift', 'festival', 'brand', 'seasonal', 'space']).optional() }) }, async (req, res) => {
   const data = await withImage({ ...req.body }, await Collection.findById(req.params.id).select('image').lean());
   const update = data.image === null ? { $set: { ...data, image: undefined }, $unset: { image: 1 } } : { $set: data };
   if (data.image === null) delete update.$set.image;
